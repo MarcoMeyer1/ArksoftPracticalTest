@@ -1,0 +1,131 @@
+﻿@model ArksoftPractical_MarcoMeyer.Models.CustomerListViewModel
+@{
+    ViewData["Title"] = "Customer List";
+    string otherDir = Model.SortAsc ? "desc" : "asc";
+}
+
+<h2>Customer List</h2>
+
+<!-- Filter form for searching customers by Name or VAT Number -->
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input name="filterName"
+               value="@Model.FilterName"
+               class="form-control"
+               placeholder="Filter by Name" />
+    </div>
+    <div class="col-auto">
+        <input name="filterVat"
+               value="@Model.FilterVat"
+               class="form-control"
+               placeholder="Filter by VAT" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Clear</a>
+    </div>
+</form>
+
+
+<table class="table table-striped table-bordered">
+    <thead class="table-light">
+        <tr>
+            <!-- Sortable Name column header -->
+            <th> 
+                <a asp-action="Index"
+                   asp-route-sortField="Name"
+                   asp-route-sortAsc="@(Model.SortField == "Name" ? otherDir == "asc" : true)"
+                   asp-route-filterName="@Model.FilterName"
+                   asp-route-filterVat="@Model.FilterVat">
+                    Name
+                    @if (Model.SortField == "Name")
+                    {
+                        <span class="ms-1">@((Model.SortAsc) ? "▲" : "▼")</span>
+                    }
+                </a>
+            </th>
+            <th>Address</th>
+            <th>Telephone</th>
+            <th>Contact Name</th>
+            <th>Contact Email</th>
+            <!-- Sortable VAT Number column header -->
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortField="Vat"
+                   asp-route-sortAsc="@(Model.SortField == "Vat" ? otherDir == "asc" : true)"
+                   asp-route-filterName="@Model.FilterName"
+                   asp-route-filterVat="@Model.FilterVat">
+                    VAT Number
+                    @if (Model.SortField == "Vat")
+                    {
+                        <span class="ms-1">@((Model.SortAsc) ? "▲" : "▼")</span>
+                    }
+                </a>
+            </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Customers.Any())
+        {
+            <tr>
+                <td colspan="7" class="text-center">No customers found.</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var c in Model.Customers)
+            {
+                <tr>
+                    <td>@c.Name</td>
+                    <td>@c.Address</td>
+                    <td>@c.Telephone</td>
+                    <td>@c.ContactName</td>
+                    <td>@c.ContactEmail</td>
+                    <td>@c.VatNumber</td>
+                    <td>
+                        <!-- Edit Button -->
+                        <a asp-action="Edit"
+                           asp-route-id="@c.Id"
+                           class="btn btn-sm btn-secondary me-1">
+                            Edit
+                        </a>
+                        <!-- Delete Button with confirmation dialog -->
+                        <form asp-action="Delete"
+                              asp-route-id="@c.Id"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to delete @c.Name?');"
+                              style="display:inline">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- Pagination controls, visible only if there is more than one page worth of data -->
+@if (Model.TotalPages > 1)
+{
+    <nav>
+        <ul class="pagination">
+            @for (int p = 1; p <= Model.TotalPages; p++)
+            {
+                <li class="page-item @(p == Model.Page ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@p"
+                       asp-route-sortField="@Model.SortField"
+                       asp-route-sortAsc="@Model.SortAsc"
+                       asp-route-filterName="@Model.FilterName"
+                       asp-route-filterVat="@Model.FilterVat">
+                        @p
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
